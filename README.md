@@ -50,6 +50,8 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+The project is a visualization done in the javascript library d3. It allows a user to engage with various stats from the league of legends game and how these stats might or might not affect overall winrate. Through the exploration of the different stats it is possible to compare players on a background of their rank, or just compare individual players that stand out based on individual stats. <br/>
+A video explaining the different scenarios is available through the following link:  <a href="https://drive.google.com/file/d/1jG-4g1kYjBjvlIE5FFkhYojEU2vXQyDq/view?usp=sharing">View Demo</a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
