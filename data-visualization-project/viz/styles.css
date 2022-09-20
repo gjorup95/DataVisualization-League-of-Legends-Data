@@ -1,0 +1,93 @@
+@font-face {
+  font-family: 'Roboto', sans-serif;
+    src: url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+    font-weight: 400;
+}
+.wrapper {
+  position: relative;
+}
+
+.marimekko-container {
+  outline: 1px solid black;
+  padding-top: 30px;
+  max-height: 780px;
+}
+
+.scatterplot-container {
+  margin-left: 0;
+  padding-left: 0;
+  justify-content: flex-start;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  padding: 3em 1em;
+  font-family: 'Roboto', sans-serif;
+  font-size: 22px;
+  color: #34495e;
+  background: #f8f9fa;
+}
+
+.tooltip {
+  opacity: 0;
+  position: absolute;
+  top: -14px;
+  left: 0;
+  padding: 0.6em 1em;
+  background: #fff;
+  text-align: left;
+  line-height: 1.4em;
+  font-size: 0.5em;
+  border: 1px solid #ddd;
+  z-index: 10;
+  transition: all 0.1s ease-out;
+  pointer-events: none;
+}
+.tooltip:before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 1px solid #ddd;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  transform: translate(-50%, 50%) rotate(45deg);
+  transform-origin: center center;
+  z-index: 10;
+}
+.tooltip-Name {
+  margin-bottom: 0.2em;
+  font-weight: 600;
+  font-size: 1.4em;
+  line-height: 1.4em;
+}
+.tooltip-dot {
+  fill: none;
+  stroke: #030202;
+  stroke-width: 2px;
+  }
+svg {
+  fill: #34495e;
+}
+#legendWrapper{
+display: flex;
+justify-content: end;
+}
+#resetButton{
+  height: 40px;
+  width: 60px;
+}
+
+.select-effect {
+  fill: none;
+  stroke: #030202;;
+  stroke-width: 3px;
+  z-index: 20;
+  }
+  #selectText{
+    font-weight: bold;
+  }

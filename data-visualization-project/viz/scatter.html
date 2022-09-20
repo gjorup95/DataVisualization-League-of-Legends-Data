@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="styles.css"></link>
+        <title>Gold Winrate</title>
+    </head>
+    <body>
+        <div>
+            <div id="legendWrapper">
+                <button id="resetButton" type="button">Reset</button>
+        <div id="legend"></div>
+    </div>
+        <div id="wrapper" class="wrapper">
+            
+            
+            <div id="tooltip" class="tooltip">
+                <div class="tooltip-Name">
+                    <span id="Name"></span>
+                </div>
+                <div class="tooltip-Gold">
+                    Gold: <span id="Gold"></span>
+                </div>
+                <div class="tooltip-Winrate">
+                    Winrate: <span id="Winrate"></span>
+                </div>
+                <div class="tooltip-Rank">
+                    Rank: <span id="Rank"></span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="draw-scatter.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
+        
+    </body>
+
+</html>

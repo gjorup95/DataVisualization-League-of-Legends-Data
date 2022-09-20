@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+
+<meta charset="utf-8">
+<style>
+    body {
+        font: 10px sans-serif;
+    }
+
+    rect {
+        stroke: #000;
+    }
+
+    svg {
+        shape-rendering: crispEdges;
+    }
+</style>
+
+<head>
+    <title>Marimekko Chart</title>
+
+
+
+</head>
+
+<body>
+    <div class="container" style="margin-left: unset;">
+        <div class="row">
+            <div class="col scatterplot-container">
+                <div id="sutteP">
+                </div>
+                <div id="sutteP1">
+                </div>
+            </div>
+            <div class="line"></div>
+            <div class="col marimekko-container">
+                <div style="top:-40px;left:50px" class="col-12">
+                    <div id="player1"></div>
+                </div>
+                <div class="slidecontainer" style="position: absolute; top: 350px;">
+                    <p>Buffer</p>
+                    <input type="range" min="1" max="100" value="50" class="slider" id="buffer">
+                    <div id="bufferText">50 gold</div>
+                </div>
+                <div id="compare"
+                    style="position:absolute;border:solid;border-width: 0.5px;right:-320px;top:258px;height:300px;width:260px"
+                    class="compare">
+                </div>
+                <div style="top:-20px;left:50px" class="col-12">
+                    <div id="player2"></div>
+                </div>
+            </div>
+            <div>
+                <h1 style="position:absolute;padding-left: 10px;text-align: center;">
+                    League of Legends Visualization
+                </h1>
+            </div>
+        </div>
+
+        <div>
+
+</html>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+    var d3v3 = window.d3;
+    window.d3 = null;
+</script>
+<script src="https://d3js.org/d3.v5.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(function () {
+        $(document).ready(function () {
+            $("#sutteP").load("scatter.html");
+        });
+    });
+    $(function () {
+        $(document).ready(function () {
+            $("#sutteP1").load("scatterdamage.html");
+        });
+    });
+</script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<style>
+    .bar {
+        fill: steelblue;
+    }
+
+    .bar:hover {
+        fill: brown;
+    }
+
+    .axis {
+        font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+<script>
+    var slider = document.getElementById("buffer");
+    var output = document.getElementById("bufferText");
+    output.innerHTML = slider.value; // Display the default slider value
+
+    // Update the current slider value (each time you drag the slider handle)
+    slider.oninput = function () {
+        output.innerHTML = this.value + " gold";
+        buffer = this.value
+    }
+    function doActualDraw(playername1, playername2) {
+        // playername1 = "FnatInflation"
+        // playername2 = "Scarlet Rose"
+        console.log("doing draw")
+        fetch("../Data/stats.json")
+            .then(response => response.json())
+            .then(data => {
+                let len1 = data[playername1].IntervalStats.length - data[playername1].IntervalStats.length % 5
+                let len2 = data[playername2].IntervalStats.length - data[playername2].IntervalStats.length % 5
+                let len = Math.min(len1, len2)
+                draw(playername1, "player1", len)
+                draw(playername2, "player2", len)
+            })
+
+    }
+
+    function drawBar(player1, player2, color, category) {
+
+        // set the dimensions of the canvas
+        var margin = { top: 20, right: 20, bottom: 70, left: 40 },
+            width = 200,
+            height = 200;
+
+        // set the ranges
+        var x = d3v3.scale.ordinal().rangeRoundBands([0, width], .05);
+
+        var y = d3v3.scale.linear().range([height, 0]);
+
+        // define the axis
+        var xAxis = d3v3.svg.axis()
+            .scale(x)
+            .orient("bottom")
+
+
+        var yAxis = d3v3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .ticks(10);
+
+
+        // add the SVG element
+        var svg = d3v3.select("#compare").append("svg")
+            .attr("id", "barChart")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + 45 + "," + 20 + ")");
+        data = [{ player: player1.player, value: player1.value }, { player: player2.player, value: player2.value }]
+
+        data.forEach(function (d) {
+            d.player = d.player;
+            d.value = +d.value;
+        });
+        // scale the range of the data
+        x.domain(data.map(function (d) { return d.player; }));
+        y.domain([0, d3v3.max(data, function (d) { return d.value; })]);
+        // add axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", "-.55em")
+            .attr("transform", "rotate(-90)");
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("y", -15)
+            .attr("x", width / 2 + 10)
+            .style("font-weight", "bold")
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text(category + " gold");
+
+
+        // Add bar chart
+        svg.selectAll("bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function (d) { return x(d.player); })
+            .attr("width", x.rangeBand())
+            .style("fill", color)
+            .attr("y", function (d) { return y(d.value); })
+            .attr("height", function (d) { return height - y(d.value); });
+
+    }
+    addTutorialText()
+
+
+
+    let buffer = 50;
+
+
+    function findPlayers(category, value, interval) {
+        similarPlayers = []
+        fetch("../Data/stats.json")
+            .then(response => response.json())
+            .then(data => {
+                let keys = []
+                let pl = data["ParticipantList"]
+                for (let k = 0; k < data["ParticipantList"].length; k++) {
+                    keys.push(Object.keys(pl[k])[0])
+                }
+                let offset = interval.substring(0, 2)
+                if (offset === "00" || offset === "05") {
+                    offset = offset.charAt(1)
+                }
+
+                offset = parseInt(offset)
+                for (let i = 0; i < keys.length; i++) {
+                    let v = 0
+                    for (let l = offset; l < offset + 5; l++) {
+                        if (data[keys[i]].IntervalStats[l] != null) {
+                            v += data[keys[i]].IntervalStats[l][category]
+                        }
+                    }
+                    if (value > v - buffer && value < v + buffer) {
+                        similarPlayers.push(keys[i])
+                    }
+                }
+                // TO DO: Give data to suppemagi
+                selectSpecificPlayers(similarPlayers)
+            })
+
+    }
+
+    function reformatPlayer(data, i, len) {
+        let tempPassive = 0;
+        let tempBuildings = 0;
+        let tempKills = 0;
+        let tempMinions = 0;
+        //console.log(data.length)
+        //console.log(i)
+        for (j = 0; j < 5; j++) {
+            if (i + j >= len) { break; }
+            tempPassive += data[i + j].Passive
+            tempBuildings += data[i + j].Buildings
+            tempKills += data[i + j].Kills
+            tempMinions += data[i + j].Minions
+        }
+        return { tempPassive, tempBuildings, tempKills, tempMinions }
+    }
+
+    function addTutorialText() {
+        var div = document.createElement("div")
+        div.id = "tut"
+        div.style["display"] = "flex"
+        div.style["align-items"] = "center"
+        div.style["justify-content"] = "center"
+        div.style["width"] = "100%"
+        div.style["height"] = "100%"
+        var tag = document.createElement("p");
+        var text = document.createTextNode("Hover a statistic to compare");
+        tag.appendChild(text);
+        div.append(tag)
+        document.getElementById("compare").append(div)
+    }
+    function draw(playername, id, len) {
+
+        var width = 600,
+            height = 400
+        margin = 80;
+
+        var x = d3v3.scale.linear()
+            .range([0, width - 3 * margin]);
+
+        var y = d3v3.scale.linear()
+            .range([0, height - 2 * margin]);
+
+
+        let z = d3v3.scale.ordinal()
+            .range(["#4477AA", "#66CCEE", "#228833", "#CCBB44"]);
+
+        var n = d3v3.format(",d"),
+            p = d3v3.format("%");
+        d3v3.json("../Data/stats.json", function (error, data) {
+            var svg = d3v3.select("#" + id).append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" + margin + "," + margin + ")");
+
+            if (error) throw error;
+            let intervals = ["00-05", "05-10", "10-15", "15-20", "20-25", "25-30", "30-35", "35-40", "40-45", "45-50", "50-55", "55-60"]
+            let intervals2 = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-35", "35-40", "40-45", "45-50", "55-60"]
+
+            let keys = ["Passive", "Buildings", "Kills", "Minions"]
+            playerData = []
+
+            data1 = data[playername].IntervalStats
+            // Fill array with right format
+            for (i = 0; i <= len; i += 5) {
+                values = reformatPlayer(data1, i, len)
+                playerData.push({ market: keys[0], segment: intervals[i / 5], value: values.tempPassive, player: playername })
+                playerData.push({ market: keys[1], segment: intervals[i / 5], value: values.tempBuildings, player: playername })
+                playerData.push({ market: keys[2], segment: intervals[i / 5], value: values.tempKills, player: playername })
+                playerData.push({ market: keys[3], segment: intervals[i / 5], value: values.tempMinions, player: playername })
+            }
+
+            data = playerData
+            var offset = 0;
+
+            // Nest values by segment. We assume each segment+market is unique.
+            var segments = d3v3.nest()
+                .key(function (d) { return d.segment; })
+                .entries(data);
+            // Compute the total sum, the per-segment sum, and the per-market offset.
+            // You can use reduce rather than reduceRight to reverse the ordering.
+            // We also record a reference to the parent segment for each market.
+            var sum = segments.reduce(function (v, p) {
+                return (p.offset = v) + (p.sum = p.values.reduceRight(function (v, d) {
+                    d.parent = p;
+                    return (d.offset = v) + d.value;
+                }, 0));
+            }, 0);
+
+
+            // Add y-axis ticks.
+            var ytick = svg.selectAll(".y")
+                .data(y.ticks(10))
+                .enter().append("g")
+                .attr("class", "y")
+                .attr("transform", function (d) { return "translate(0," + y(1 - d) + ")"; });
+
+            ytick.append("line")
+                .attr("x1", -6)
+                .style("stroke", "#000");
+            ytick.append("text")
+                .attr("x", -8)
+                .attr("text-anchor", "end")
+                .attr("dy", ".35em")
+                .text(p);
+
+            ytick.each(function (_, i) {
+                if (i % 2 !== 0) d3v3.select(this).remove();
+            });
+
+            // Legend
+            // Add one dot in the legend for each name.
+            var size = 20
+            legendX = width - 180
+
+            svg.selectAll("mydots")
+                .data(keys.reverse())
+                .enter()
+                .append("rect")
+                .attr("x", legendX - 25)
+                .attr("class", function (d) {
+                    return d
+                })
+                .attr("y", function (d, i) { return i * (25) + 80 }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("width", size)
+                .attr("height", size)
+                .style("fill", function (d) { return z(d) })
+            // Add one dot in the legend for each name.
+            svg.selectAll("mylabels")
+                .data(keys)
+                .enter()
+                .append("text")
+                .attr("x", legendX)
+                .attr("y", function (d, i) { return i * (25) + 90 }) // 100 is where the first dot appears. 25 is the distance between dots
+                .text(function (d) { return d })
+                .attr("text-anchor", "left")
+                .style("alignment-baseline", "middle")
+
+            // Add y axis label    
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -40)
+                .attr("x", -height / 2 + 150)
+                .style("font-weight", "bold")
+                .style("font-size", "14px")
+                .html("Gold distribution %")
+
+            // Add x axis label
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("x", width / 2 - margin)
+                .attr("y", height - margin - 50)
+                .style("font-weight", "bold")
+                .style("font-size", "12px")
+                .text("% of total gold earned");
+
+
+            // Add a group for each segment.
+            var segments = svg.selectAll(".segment")
+                .data(segments)
+                .enter().append("g")
+                .attr("class", "segment")
+
+                .attr("xlink:title", function (d) { return d.key; })
+                .attr("transform", function (d) {
+                    return "translate(" + x((d.offset) / sum) + ")";
+                });
+
+            let widths = []
+            let widthCounter = 0;
+            // Add a rect for each market.
+            var markets = segments.selectAll(".market")
+                .data(function (d) { return d.values; })
+                .enter().append("a")
+                .attr("value", function (d) { return d.value })
+                .attr("class", function (d) { return "market" + " " + d.segment.substr(0, 2) + d.market })
+                .attr("xlink:title", function (d) {
+                    return "Value: " + d.value.toFixed(2) + ", Player: " + d.player
+                })
+                .on("mouseover", function (d) {
+                    document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[0].children[0].style["stroke-width"] = "3px"
+                    document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[1].children[0].style["stroke-width"] = "3px"
+                    document.getElementsByClassName(d.market)[0].style["stroke-width"] = "3px"
+                    document.getElementsByClassName(d.market)[1].style["stroke-width"] = "3px"
+                    let player1val = document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[0].getAttribute("value")
+                    let player2val = document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[1].getAttribute("value")
+
+                    let player1name = document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[0].getAttribute("title").split("Player: ").pop()
+                    let player2name = document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[1].getAttribute("title").split("Player: ").pop()
+
+                    player1 = { player: player1name, value: player1val }
+                    player2 = { player: player2name, value: player2val }
+                    let color = document.getElementsByClassName(d.market)[0].style["fill"]
+                    document.getElementById("tut").remove()
+
+                    drawBar(player1, player2, color, d.market)
+
+                })
+                .on("mouseout", function (d) {
+                    document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[0].children[0].style["stroke-width"] = "1px"
+                    document.getElementsByClassName(d.segment.substr(0, 2) + d.market)[1].children[0].style["stroke-width"] = "1px"
+                    document.getElementsByClassName(d.market)[0].style["stroke-width"] = "1px"
+                    document.getElementsByClassName(d.market)[1].style["stroke-width"] = "1px"
+                    document.getElementById("barChart").remove()
+                    addTutorialText()
+
+
+                })
+                .append("rect")
+                .on("click", function (d) {
+                    findPlayers(d.market, d.value, d.segment)
+                })
+                .attr("y", function (d) { return y(d.offset / d.parent.sum); })
+                .attr("height", function (d) { return y(d.value / d.parent.sum); })
+                .attr("width", function (d) {
+                    if (widthCounter % 4 == 0) {
+                        widths.push(x(d.parent.sum / sum))
+                    }
+                    widthCounter++
+                    return x(d.parent.sum / sum);
+                })
+                .style("fill", function (d) { return z(d.market); })
+            // Add x-axis ticks.
+            var xtick = svg.selectAll(".x")
+                .data(x.ticks(10))
+                .enter().append("g")
+                .attr("class", "x")
+                .attr("transform", function (d) { return "translate(" + x(d) + "," + y(1) + ")"; });
+
+            xtick.append("line")
+                .attr("y2", 6)
+                .style("stroke", "#000");
+
+            xtick.append("text")
+                .attr("y", 8)
+                .attr("text-anchor", "middle")
+                .attr("dy", ".71em")
+                .text(p);
+
+            xtick.each(function (_, i) {
+                if (i % 2 !== 0) d3v3.select(this).remove();
+            });
+            let current = 0;
+            let w = 0
+            // Add interal texts
+
+            var interTick = svg.selectAll(".int")
+                .data(intervals.slice(0, widths.length - 1))
+                .enter().append("g")
+                .attr("class", "xint")
+                .attr("transform", function (d) {
+                    tempW = w + (widths[current] / 2)
+                    w = w + (widths[current])
+                    current++
+                    if (current === widths.length) {
+                        tempW += 10
+                    }
+                    return "translate(" + tempW + "," + -25 + ")";
+                });
+            let intervalTextCounter = 0;
+            interTick.append("text")
+                .attr("y", 8)
+                .attr("text-anchor", "middle")
+                .attr("dy", ".71em")
+                .style("font-size", "12px")
+                .text(function (d) {
+                    let text = intervals2[intervalTextCounter]
+                    intervalTextCounter++
+                    return text
+                });
+            // 
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(y)
+                .append("text")
+                .attr("y", -35)
+                .attr("x", width / 2 - margin - 10)
+                .style("font-size", "16px")
+                .style("font-weight", "bold")
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text(playername);
+        });
+
+    }
+
+</script>
