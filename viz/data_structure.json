@@ -1,0 +1,40 @@
+[
+    {
+        "Name": "FnatInflation",
+        "puuid": "yeVsLqEmmFGTOywhmUn1x-qdUvLzMFRwY9A5KLu0N44vhyKhuSg2Ig7Jzx45JGF4g39ryjcYliwaWA"
+    },
+    {
+        "Winrate": 51.02040816326531,
+        "Gold": 8279.612244897959,
+        "Damage": 29885.918367346938,
+        "Gamelength": 30.73469387755102
+    },
+    {
+        "Average": [
+            {
+                "Passive": 45,
+                "Buildings": 5,
+                "Kills": 10,
+                "Minions": 20
+            },
+            {
+                "Passive": 80,
+                "Buildings": 5,
+                "Kills": 15,
+                "Minions": 30
+            },
+            {
+                "Passive": 45,
+                "Buildings": 5,
+                "Kills": 20,
+                "Minions": 25
+            },
+            {
+                "Passive": 70,
+                "Buildings": 5,
+                "Kills": 35,
+                "Minions": 20
+            }
+        ]
+    }
+]
